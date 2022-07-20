@@ -14,7 +14,7 @@ contract Ballot {
 
     Proposal[] proposals;
 
-    mapping(address => Voters) voters; //voters get address as a key and Voter for a value 
+    mapping(address => Voter ) voters; //voters get address as a key and Voter for a value 
     
     address public chairperson
 
@@ -41,5 +41,32 @@ contract Ballot {
         voters[voter].weight = 1
     }
 
-    
+    function vote (uint proposal) public{
+        Voter storage sender = voters[msg.sender];
+        require(sender.weight != 0, 'Has no right to vote');
+        require(!sender.voted, "Has Voted Already");
+        sender.voted = true;
+        sender.vote = proposal;
+
+        proposals[proposal].voteCount += sender.weight
+    }
+
+    // Functions for showing the results
+
+    //1.Function that shows the winning proposal (index)
+    function winningProposal () public view returns(uint winningProposal_) {
+
+        uint winningVoteCount = 0;
+        for(uint i =0; i < proposals.length; i++) {
+            if(proposals[i].voteCount > winningVoteCount) {
+                winningVoteCount = proposals[1].voteCount;
+                winningProposal = i;
+            }   
+        }
+    }
+
+    //2.Function that shows the winner by name 
+    function winnersName () public view returns (bytes32 _winner) {
+        _winner = proposals[winningProposal()].name;
+    }
 }
